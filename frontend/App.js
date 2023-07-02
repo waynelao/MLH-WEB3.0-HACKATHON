@@ -1,75 +1,51 @@
-import 'regenerator-runtime/runtime';
 import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
-import './assets/global.css';
-
-import { EducationalText, SignInPrompt, SignOutButton } from './ui-components';
+import Home from './Home';
+import Product from './Product';
+import Cart from './Cart';
+import Checkout from './Checkout';
+import { SignInPrompt, SignOutButton, EducationalText } from './ui-components';
 
 
 export default function App({ isSignedIn, contractId, wallet }) {
-  const [valueFromBlockchain, setValueFromBlockchain] = React.useState();
+  // Replace with actual data
+  const digitalGoods = [{ id: 1, name: 'Digital Good 1' }, { id: 2, name: 'Digital Good 2' }];
+  const [cartItems, setCartItems] = React.useState([]);
 
-  const [uiPleaseWait, setUiPleaseWait] = React.useState(true);
+  const addToCart = (digitalGood) => {
+    // Add item to cart
+    setCartItems([...cartItems, digitalGood]);
+  };
 
-  // Get blockchian state once on component load
-  React.useEffect(() => {
-    getGreeting()
-      .then(setValueFromBlockchain)
-      .catch(alert)
-      .finally(() => {
-        setUiPleaseWait(false);
-      });
-    }
-  , []);
+  const purchase = () => {
+    // Purchase items in cart
+    alert('Purchased items: ' + cartItems.map(item => item.name).join(', '));
+    setCartItems([]);
+  };
 
-  /// If user not signed-in with wallet - show prompt
   if (!isSignedIn) {
     // Sign-in flow will reload the page later
-    return <SignInPrompt greeting={valueFromBlockchain} onClick={() => wallet.signIn()}/>;
-  }
-
-  function changeGreeting(e) {
-    e.preventDefault();
-    setUiPleaseWait(true);
-    const { greetingInput } = e.target.elements;
-    
-    // use the wallet to send the greeting to the contract
-    wallet.callMethod({ method: 'set_greeting', args: { message: greetingInput.value }, contractId })
-      .then(async () => {return getGreeting();})
-      .then(setValueFromBlockchain)
-      .finally(() => {
-        setUiPleaseWait(false);
-      });
-  }
-
-  function getGreeting(){
-    // use the wallet to query the contract's greeting
-    return wallet.viewMethod({ method: 'get_greeting', contractId })
+    return <SignInPrompt onClick={() => wallet.signIn()}/>;
   }
 
   return (
-    <>
+    <Router>
       <SignOutButton accountId={wallet.accountId} onClick={() => wallet.signOut()}/>
-      <main className={uiPleaseWait ? 'please-wait' : ''}>
-        <h1>
-          The contract says: <span className="greeting">{valueFromBlockchain}</span>
-        </h1>
-        <form onSubmit={changeGreeting} className="change">
-          <label>Change greeting:</label>
-          <div>
-            <input
-              autoComplete="off"
-              defaultValue={valueFromBlockchain}
-              id="greetingInput"
-            />
-            <button>
-              <span>Save</span>
-              <div className="loader"></div>
-            </button>
-          </div>
-        </form>
-        <EducationalText/>
-      </main>
-    </>
+      <Routes>
+        <Route path="/product/:id">
+          <Product digitalGood={digitalGoods[0]} addToCart={addToCart} />
+        </Route>
+        <Route path="/cart">
+          <Cart cartItems={cartItems} />
+        </Route>
+        <Route path="/checkout">
+          <Checkout cartItems={cartItems} purchase={purchase} />
+        </Route>
+        <Route path="/">
+          <Home digitalGoods={digitalGoods} />
+        </Route>
+      </Routes>
+    </Router>
   );
 }

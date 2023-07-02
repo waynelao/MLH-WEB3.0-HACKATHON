@@ -16,5 +16,13 @@
   "devDependencies": {
     "near-cli": "^3.3.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@near-wallet-selector/core": "^8.2.0",
+    "@near-wallet-selector/wallet-utils": "^8.2.0",
+    "near-api-js": "^2.1.4",
+    "near-wallet-selector": "^2.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.14.1"
+  }
 }
